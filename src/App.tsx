@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Goals from './pages/Goals';
 import Patients from './pages/Patients';
+import PatientManagement from './pages/PatientManagement';
 import PreventiveCarePage from './pages/PreventiveCare';
 import Profile from './pages/Profile';
 
@@ -90,9 +91,9 @@ const App: React.FC = () => {
             </ProtectedRoute>
           } />
           
-          <Route path="/assign-goals" element={
+          <Route path="/patient-management" element={
             <ProtectedRoute allowedRoles={['provider']}>
-              <Patients />
+              <PatientManagement />
             </ProtectedRoute>
           } />
         </Routes>

@@ -34,7 +34,7 @@ const AppNavbar: React.FC = () => {
                 {user?.role === 'provider' && (
                   <>
                     <Nav.Link as={Link} to="/patients">Patients</Nav.Link>
-                    <Nav.Link as={Link} to="/assign-goals">Assign Goals</Nav.Link>
+                    <Nav.Link as={Link} to="/patient-management">Manage Patients</Nav.Link>
                   </>
                 )}
               </>

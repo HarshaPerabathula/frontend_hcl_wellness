@@ -70,6 +70,18 @@ export const api = createApi({
       query: () => '/providers/patients',
       providesTags: ['Patient'],
     }),
+    getAllPatients: builder.query<User[], void>({
+      query: () => '/users/all-patients',
+      providesTags: ['Patient'],
+    }),
+    assignPatient: builder.mutation<any, { patientId: string }>({
+      query: (data) => ({
+        url: '/providers/assign-patient',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Patient'],
+    }),
     getPatientGoals: builder.query<WellnessGoal[], string>({
       query: (patientId) => `/providers/patients/${patientId}/goals`,
       providesTags: ['Goal'],
@@ -116,6 +128,8 @@ export const {
   useGetActiveGoalsQuery,
   useLogProgressMutation,
   useGetPatientsQuery,
+  useGetAllPatientsQuery,
+  useAssignPatientMutation,
   useGetPatientGoalsQuery,
   useAssignGoalMutation,
   useGetScheduleQuery,
