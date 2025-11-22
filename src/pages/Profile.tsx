@@ -9,13 +9,8 @@ const Profile: React.FC = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    phone: '',
-    allergies: [] as string[],
-    medications: [] as string[],
-    emergencyContact: { name: '', phone: '' }
+    phone: ''
   });
-  const [newAllergy, setNewAllergy] = useState('');
-  const [newMedication, setNewMedication] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -25,10 +20,7 @@ const Profile: React.FC = () => {
       setFormData({
         firstName: user.profile.firstName || '',
         lastName: user.profile.lastName || '',
-        phone: user.profile.phone || '',
-        allergies: user.patientInfo?.allergies || [],
-        medications: user.patientInfo?.medications || [],
-        emergencyContact: user.patientInfo?.emergencyContact || { name: '', phone: '' }
+        phone: user.profile.phone || ''
       });
     }
     fetchProfile();
@@ -44,10 +36,7 @@ const Profile: React.FC = () => {
       setFormData({
         firstName: userData.profile.firstName || '',
         lastName: userData.profile.lastName || '',
-        phone: userData.profile.phone || '',
-        allergies: userData.patientInfo?.allergies || [],
-        medications: userData.patientInfo?.medications || [],
-        emergencyContact: userData.patientInfo?.emergencyContact || { name: '', phone: '' }
+        phone: userData.profile.phone || ''
       });
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load profile');
@@ -69,40 +58,6 @@ const Profile: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const addAllergy = () => {
-    if (newAllergy.trim() && !formData.allergies.includes(newAllergy.trim())) {
-      setFormData({
-        ...formData,
-        allergies: [...formData.allergies, newAllergy.trim()]
-      });
-      setNewAllergy('');
-    }
-  };
-
-  const removeAllergy = (allergy: string) => {
-    setFormData({
-      ...formData,
-      allergies: formData.allergies.filter(a => a !== allergy)
-    });
-  };
-
-  const addMedication = () => {
-    if (newMedication.trim() && !formData.medications.includes(newMedication.trim())) {
-      setFormData({
-        ...formData,
-        medications: [...formData.medications, newMedication.trim()]
-      });
-      setNewMedication('');
-    }
-  };
-
-  const removeMedication = (medication: string) => {
-    setFormData({
-      ...formData,
-      medications: formData.medications.filter(m => m !== medication)
-    });
   };
 
   return (
@@ -175,7 +130,7 @@ const Profile: React.FC = () => {
                   />
                 </Form.Group>
 
-                {user?.role === 'patient' && (
+                {/* {user?.role === 'patient' && (
                   <>
                     <hr />
                     <h5>Health Information</h5>
@@ -286,9 +241,9 @@ const Profile: React.FC = () => {
                       </Col>
                     </Row>
                   </>
-                )}
+                )} */}
 
-                {user?.role === 'provider' && user.providerInfo && (
+                {/* {user?.role === 'provider' && user.providerInfo && (
                   <>
                     <hr />
                     <h5>Provider Information</h5>
@@ -323,7 +278,7 @@ const Profile: React.FC = () => {
                       />
                     </Form.Group>
                   </>
-                )}
+                )} */}
 
                 <Button type="submit" variant="primary" disabled={loading} className="w-100">
                   {loading ? 'Updating...' : 'Update Profile'}
