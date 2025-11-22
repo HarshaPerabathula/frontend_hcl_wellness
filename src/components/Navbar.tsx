@@ -44,7 +44,7 @@ const AppNavbar: React.FC = () => {
             {isAuthenticated ? (
               <>
                 <Navbar.Text className="me-3">
-                  Welcome, {user?.profile.firstName}
+                  Welcome, {user?.profile?.firstName || ""}
                 </Navbar.Text>
                 <Button variant="outline-light" onClick={handleLogout}>
                   Logout

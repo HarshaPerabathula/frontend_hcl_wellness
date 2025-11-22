@@ -114,21 +114,21 @@ const Patients: React.FC = () => {
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Row>
-        {patients.map((patient) => (
+        {patients && patients.map((patient) => (
           <Col md={6} lg={4} key={patient.id} className="mb-4">
             <Card>
               <Card.Header>
-                <strong>{patient.profile.firstName} {patient.profile.lastName}</strong>
+                <strong>{patient?.profile?.firstName} {patient?.profile?.lastName}</strong>
               </Card.Header>
               <Card.Body>
-                <p><strong>Email:</strong> {patient.email}</p>
-                <p><strong>Phone:</strong> {patient.profile.phone}</p>
+                <p><strong>Email:</strong> {patient?.email}</p>
+                <p><strong>Phone:</strong> {patient?.profile?.phone}</p>
                 
-                {patient.patientInfo?.allergies && patient.patientInfo.allergies.length > 0 && (
+                {patient?.patientInfo?.allergies && patient?.patientInfo?.allergies.length > 0 && (
                   <div className="mb-2">
                     <strong>Allergies:</strong>
                     <div>
-                      {patient.patientInfo.allergies.map((allergy, index) => (
+                      {patient?.patientInfo?.allergies.map((allergy, index) => (
                         <Badge key={index} bg="warning" className="me-1">
                           {allergy}
                         </Badge>
@@ -137,11 +137,11 @@ const Patients: React.FC = () => {
                   </div>
                 )}
 
-                {patient.patientInfo?.medications && patient.patientInfo.medications.length > 0 && (
+                {patient?.patientInfo?.medications && patient?.patientInfo?.medications.length > 0 && (
                   <div className="mb-3">
                     <strong>Medications:</strong>
                     <div>
-                      {patient.patientInfo.medications.map((medication, index) => (
+                      {patient?.patientInfo?.medications.map((medication, index) => (
                         <Badge key={index} bg="info" className="me-1">
                           {medication}
                         </Badge>
@@ -185,7 +185,7 @@ const Patients: React.FC = () => {
       <Modal show={showGoalsModal} onHide={() => setShowGoalsModal(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>
-            Goals for {selectedPatient?.profile.firstName} {selectedPatient?.profile.lastName}
+            Goals for {selectedPatient?.profile?.firstName} {selectedPatient?.profile?.lastName}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -240,7 +240,7 @@ const Patients: React.FC = () => {
       <Modal show={showAssignModal} onHide={() => setShowAssignModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Assign Goal to {selectedPatient?.profile.firstName} {selectedPatient?.profile.lastName}
+            Assign Goal to {selectedPatient?.profile?.firstName} {selectedPatient?.profile?.lastName}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
