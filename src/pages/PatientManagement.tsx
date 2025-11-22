@@ -235,7 +235,7 @@ const PatientManagement: React.FC = () => {
                 type="number"
                 value={goalForm.dailyTarget}
                 onChange={(e) => setGoalForm({...goalForm, dailyTarget: e.target.value})}
-                placeholder={Enter daily target in ${goalForm.unit}}
+                placeholder={`Enter daily target in ${goalForm.unit}`}
               />
             </Form.Group>
 
