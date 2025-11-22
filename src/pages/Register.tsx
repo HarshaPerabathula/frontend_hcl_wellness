@@ -156,7 +156,7 @@ const Register: React.FC = () => {
                 <Form.Group className="mb-3">
                   <Form.Check
                     type="checkbox"
-                    label="I consent to the collection and use of my health data in accordance with HIPAA regulations"
+                    label="I Agreed to Terms & Conditions"
                     checked={formData.consentGiven}
                     onChange={(e) => setFormData({...formData, consentGiven: e.target.checked})}
                     required
