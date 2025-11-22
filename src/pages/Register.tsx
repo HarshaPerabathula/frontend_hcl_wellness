@@ -14,9 +14,7 @@ const Register: React.FC = () => {
     lastName: '',
     dateOfBirth: '',
     phone: '',
-    consentGiven: false,
-    licenseNumber: '',
-    specialization: ''
+    consentGiven: false
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -129,7 +127,7 @@ const Register: React.FC = () => {
                     required
                   />
                 </Form.Group>
-                {formData.role === 'provider' && (
+                {/* {formData.role === 'provider' && (
                   <Row>
                     <Col md={6}>
                       <Form.Group className="mb-3">
@@ -154,7 +152,7 @@ const Register: React.FC = () => {
                       </Form.Group>
                     </Col>
                   </Row>
-                )}
+                )} */}
                 <Form.Group className="mb-3">
                   <Form.Check
                     type="checkbox"
