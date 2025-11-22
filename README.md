@@ -1,46 +1,141 @@
-# Getting Started with Create React App
+# Healthcare Management System - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React TypeScript frontend for the healthcare management system with Bootstrap UI and Chart.js analytics.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Authentication**: Login/Register with JWT tokens
+- **Patient Dashboard**: Progress tracking, health tips, upcoming checkups
+- **Provider Dashboard**: Patient management, goal assignment
+- **Goal Tracking**: Visual progress with charts and streaks
+- **Preventive Care**: Appointment scheduling and management
+- **Profile Management**: Health information and emergency contacts
+- **Responsive Design**: Bootstrap-based mobile-friendly UI
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- React 18 with TypeScript
+- React Router for navigation
+- Bootstrap & React-Bootstrap for UI
+- Chart.js & React-Chartjs-2 for analytics
+- Axios for API calls
+- Local storage for authentication
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Quick Start
 
-### `npm test`
+1. **Install Dependencies**
+```bash
+npm install
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. **Start Development Server**
+```bash
+npm start
+```
 
-### `npm run build`
+3. **Build for Production**
+```bash
+npm run build
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Project Structure
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+src/
+├── components/          # Reusable UI components
+│   └── Navbar.tsx      # Navigation bar
+├── pages/              # Page components
+│   ├── Login.tsx       # Login page
+│   ├── Register.tsx    # Registration page
+│   ├── Dashboard.tsx   # Main dashboard
+│   ├── Goals.tsx       # Patient goals page
+│   ├── Patients.tsx    # Provider patients page
+│   ├── PreventiveCare.tsx # Checkups page
+│   └── Profile.tsx     # User profile page
+├── services/           # API service layer
+│   └── api.ts         # Axios API calls
+├── types/             # TypeScript interfaces
+│   └── index.ts       # Type definitions
+├── utils/             # Utility functions
+│   └── auth.ts        # Authentication helpers
+└── App.tsx            # Main app component
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Key Features
 
-### `npm run eject`
+### Patient Features
+- View wellness goals and progress
+- Log daily activities (steps, water, sleep, etc.)
+- Track streaks and completion rates
+- Schedule preventive care appointments
+- View health tips and reminders
+- Manage health information and allergies
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Provider Features
+- View assigned patients
+- Assign wellness goals to patients
+- Monitor patient compliance and progress
+- View patient health information
+- Track goal completion rates
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Analytics & Charts
+- Progress bar charts for daily goals
+- Doughnut charts for goal status distribution
+- Streak tracking and completion rates
+- Historical progress visualization
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## API Integration
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+The frontend connects to the backend API at `http://localhost:5000/api` with the following endpoints:
 
-## Learn More
+- **Auth**: `/auth/login`, `/auth/register`
+- **Users**: `/users/profile`, `/users/give-consent`
+- **Patients**: `/patients/dashboard`, `/patients/log-progress`
+- **Providers**: `/providers/patients`, `/providers/assign-goals`
+- **Preventive Care**: `/preventive-care/schedule`, `/preventive-care/book`
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Authentication Flow
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. User registers/logs in
+2. JWT token stored in localStorage
+3. Token included in API requests via Axios interceptor
+4. Protected routes check authentication status
+5. Role-based access control for patient/provider features
+
+## Usage Examples
+
+### Patient Workflow
+1. Register as patient
+2. View dashboard with assigned goals
+3. Log daily progress for wellness goals
+4. Schedule preventive care appointments
+5. Track progress with visual charts
+
+### Provider Workflow
+1. Register as healthcare provider
+2. View assigned patients list
+3. Assign wellness goals to patients
+4. Monitor patient compliance and progress
+5. View detailed patient health information
+
+## Environment Variables
+
+Create `.env` file in frontend root:
+```
+REACT_APP_API_URL=http://localhost:5000/api
+```
+
+## Development
+
+- Uses Create React App with TypeScript template
+- Bootstrap for responsive design
+- Chart.js for data visualization
+- Axios for HTTP requests
+- React Router for client-side routing
+
+## Production Deployment
+
+1. Build the application: `npm run build`
+2. Serve the `build` folder with a web server
+3. Configure API URL for production environment
+4. Enable HTTPS for secure authentication# frontend_hcl_wellness
