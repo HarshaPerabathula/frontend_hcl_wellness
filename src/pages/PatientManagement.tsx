@@ -26,10 +26,12 @@ const PatientManagement: React.FC = () => {
 
   const handleAssignPatient = async (patientId: string) => {
     try {
+      console.log('Assigning patient with ID:', patientId);
       await assignPatient({ patientId }).unwrap();
       setSuccess('Patient assigned successfully');
       refetch();
     } catch (err: any) {
+      console.error('Assignment error:', err);
       setError(err.data?.error || 'Failed to assign patient');
     }
   };
@@ -37,19 +39,32 @@ const PatientManagement: React.FC = () => {
   const handleAssignGoal = async () => {
     if (!selectedPatient) return;
 
+    const patientId = selectedPatient._id || selectedPatient.id;
+    console.log('Selected patient:', selectedPatient);
+    console.log('Patient ID for goal:', patientId);
+
+    if (!patientId) {
+      setError('Patient ID is missing');
+      return;
+    }
+
     try {
-      await assignGoal({
-        patientId: selectedPatient._id || selectedPatient.id,
+      const goalData = {
+        patientId: patientId,
         goalType: goalForm.goalType,
         targets: { daily: parseInt(goalForm.dailyTarget) },
         unit: goalForm.unit,
         duration: {
-          startDate: goalForm.startDate,
-          endDate: goalForm.endDate,
+          startDate: new Date(goalForm.startDate).toISOString(),
+          endDate: new Date(goalForm.endDate).toISOString(),
           periodType: 'custom'
         },
         notes: goalForm.notes
-      }).unwrap();
+      };
+
+      console.log('Goal data being sent:', goalData);
+      
+      await assignGoal(goalData).unwrap();
 
       setSuccess('Goal assigned successfully');
       setShowGoalModal(false);
@@ -62,11 +77,13 @@ const PatientManagement: React.FC = () => {
         notes: ''
       });
     } catch (err: any) {
+      console.error('Goal assignment error:', err);
       setError(err.data?.error || 'Failed to assign goal');
     }
   };
 
   const openGoalModal = (patient: User) => {
+    console.log('Opening goal modal for patient:', patient);
     setSelectedPatient(patient);
     setShowGoalModal(true);
   };
@@ -114,29 +131,32 @@ const PatientManagement: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {allPatients.map((patient) => (
-                      <tr key={patient._id || patient.id}>
-                        <td>{patient.profile.firstName} {patient.profile.lastName}</td>
-                        <td>
-                          {patient.patientInfo?.assignedProvider ? (
-                            <Badge bg="success">Assigned</Badge>
-                          ) : (
-                            <Badge bg="secondary">Unassigned</Badge>
-                          )}
-                        </td>
-                        <td>
-                          {!patient.patientInfo?.assignedProvider && (
-                            <Button
-                              size="sm"
-                              variant="primary"
-                              onClick={() => handleAssignPatient(patient._id || patient.id)}
-                            >
-                              Assign to Me
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {allPatients.map((patient) => {
+                      const patientId = patient._id || patient.id;
+                      return (
+                        <tr key={patientId}>
+                          <td>{patient.profile.firstName} {patient.profile.lastName}</td>
+                          <td>
+                            {patient.patientInfo?.assignedProvider ? (
+                              <Badge bg="success">Assigned</Badge>
+                            ) : (
+                              <Badge bg="secondary">Unassigned</Badge>
+                            )}
+                          </td>
+                          <td>
+                            {!patient.patientInfo?.assignedProvider && (
+                              <Button
+                                size="sm"
+                                variant="primary"
+                                onClick={() => handleAssignPatient(patientId)}
+                              >
+                                Assign to Me
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </Table>
               ) : (
@@ -161,20 +181,23 @@ const PatientManagement: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {assignedPatients.map((patient) => (
-                      <tr key={patient._id || patient.id}>
-                        <td>{patient.profile.firstName} {patient.profile.lastName}</td>
-                        <td>
-                          <Button
-                            size="sm"
-                            variant="success"
-                            onClick={() => openGoalModal(patient)}
-                          >
-                            Assign Goal
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
+                    {assignedPatients.map((patient) => {
+                      const patientId = patient._id || patient.id;
+                      return (
+                        <tr key={patientId}>
+                          <td>{patient.profile.firstName} {patient.profile.lastName}</td>
+                          <td>
+                            <Button
+                              size="sm"
+                              variant="success"
+                              onClick={() => openGoalModal(patient)}
+                            >
+                              Assign Goal
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </Table>
               ) : (
@@ -212,7 +235,7 @@ const PatientManagement: React.FC = () => {
                 type="number"
                 value={goalForm.dailyTarget}
                 onChange={(e) => setGoalForm({...goalForm, dailyTarget: e.target.value})}
-                placeholder={`Enter daily target in ${goalForm.unit}`}
+                placeholder={Enter daily target in ${goalForm.unit}}
               />
             </Form.Group>
 

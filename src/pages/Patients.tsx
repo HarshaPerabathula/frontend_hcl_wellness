@@ -48,7 +48,8 @@ const Patients: React.FC = () => {
 
   const handleViewGoals = async (patient: User) => {
     setSelectedPatient(patient);
-    await fetchPatientGoals(patient.id);
+    const patientId = patient._id || patient.id;
+    await fetchPatientGoals(patientId);
     setShowGoalsModal(true);
   };
 
@@ -56,17 +57,18 @@ const Patients: React.FC = () => {
     if (!selectedPatient) return;
 
     try {
+      const patientId = selectedPatient._id || selectedPatient.id;
       const endDate = new Date(goalForm.startDate);
       endDate.setMonth(endDate.getMonth() + (goalForm.periodType === '1_month' ? 1 : 3));
 
       await providerAPI.assignGoal({
-        patientId: selectedPatient.id,
+        patientId: patientId,
         goalType: goalForm.goalType,
         targets: { daily: goalForm.dailyTarget },
         unit: goalForm.unit,
         duration: {
-          startDate: goalForm.startDate,
-          endDate: endDate.toISOString().split('T')[0],
+          startDate: new Date(goalForm.startDate).toISOString(),
+          endDate: endDate.toISOString(),
           periodType: goalForm.periodType
         },
         notes: goalForm.notes
@@ -74,7 +76,7 @@ const Patients: React.FC = () => {
 
       setShowAssignModal(false);
       if (showGoalsModal) {
-        await fetchPatientGoals(selectedPatient.id);
+        await fetchPatientGoals(patientId);
       }
       
       // Reset form
@@ -114,65 +116,68 @@ const Patients: React.FC = () => {
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Row>
-        {patients && patients.map((patient) => (
-          <Col md={6} lg={4} key={patient.id} className="mb-4">
-            <Card>
-              <Card.Header>
-                <strong>{patient?.profile?.firstName} {patient?.profile?.lastName}</strong>
-              </Card.Header>
-              <Card.Body>
-                <p><strong>Email:</strong> {patient?.email}</p>
-                <p><strong>Phone:</strong> {patient?.profile?.phone}</p>
-                
-                {patient?.patientInfo?.allergies && patient?.patientInfo?.allergies.length > 0 && (
-                  <div className="mb-2">
-                    <strong>Allergies:</strong>
-                    <div>
-                      {patient?.patientInfo?.allergies.map((allergy, index) => (
-                        <Badge key={index} bg="warning" className="me-1">
-                          {allergy}
-                        </Badge>
-                      ))}
+        {patients.map((patient) => {
+          const patientId = patient._id || patient.id;
+          return (
+            <Col md={6} lg={4} key={patientId} className="mb-4">
+              <Card>
+                <Card.Header>
+                  <strong>{patient.profile.firstName} {patient.profile.lastName}</strong>
+                </Card.Header>
+                <Card.Body>
+                  <p><strong>Email:</strong> {patient.email}</p>
+                  <p><strong>Phone:</strong> {patient.profile.phone}</p>
+                  
+                  {patient.patientInfo?.allergies && patient.patientInfo.allergies.length > 0 && (
+                    <div className="mb-2">
+                      <strong>Allergies:</strong>
+                      <div>
+                        {patient.patientInfo.allergies.map((allergy, index) => (
+                          <Badge key={index} bg="warning" className="me-1">
+                            {allergy}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {patient?.patientInfo?.medications && patient?.patientInfo?.medications.length > 0 && (
-                  <div className="mb-3">
-                    <strong>Medications:</strong>
-                    <div>
-                      {patient?.patientInfo?.medications.map((medication, index) => (
-                        <Badge key={index} bg="info" className="me-1">
-                          {medication}
-                        </Badge>
-                      ))}
+                  {patient.patientInfo?.medications && patient.patientInfo.medications.length > 0 && (
+                    <div className="mb-3">
+                      <strong>Medications:</strong>
+                      <div>
+                        {patient.patientInfo.medications.map((medication, index) => (
+                          <Badge key={index} bg="info" className="me-1">
+                            {medication}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                <div className="d-grid gap-2">
-                  <Button 
-                    variant="primary" 
-                    size="sm"
-                    onClick={() => handleViewGoals(patient)}
-                  >
-                    View Goals & Progress
-                  </Button>
-                  <Button 
-                    variant="success" 
-                    size="sm"
-                    onClick={() => {
-                      setSelectedPatient(patient);
-                      setShowAssignModal(true);
-                    }}
-                  >
-                    Assign New Goal
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
+                  <div className="d-grid gap-2">
+                    <Button 
+                      variant="primary" 
+                      size="sm"
+                      onClick={() => handleViewGoals(patient)}
+                    >
+                      View Goals & Progress
+                    </Button>
+                    <Button 
+                      variant="success" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedPatient(patient);
+                        setShowAssignModal(true);
+                      }}
+                    >
+                      Assign New Goal
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          );
+        })}
       </Row>
 
       {patients.length === 0 && !loading && (
@@ -185,7 +190,7 @@ const Patients: React.FC = () => {
       <Modal show={showGoalsModal} onHide={() => setShowGoalsModal(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>
-            Goals for {selectedPatient?.profile?.firstName} {selectedPatient?.profile?.lastName}
+            Goals for {selectedPatient?.profile.firstName} {selectedPatient?.profile.lastName}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -240,7 +245,7 @@ const Patients: React.FC = () => {
       <Modal show={showAssignModal} onHide={() => setShowAssignModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Assign Goal to {selectedPatient?.profile?.firstName} {selectedPatient?.profile?.lastName}
+            Assign Goal to {selectedPatient?.profile.firstName} {selectedPatient?.profile.lastName}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
