@@ -50,11 +50,21 @@ export interface WellnessGoal {
   };
   status: 'active' | 'completed' | 'paused' | 'expired';
   notes?: string;
+  currentStreak?: number;
+  longestStreak?: number;
+  todayProgress?: DailyProgress;
 }
 
 export interface DailyProgress {
   _id: string;
-  goalId: string;
+  goalId: {
+    _id: string;
+    goalType: string;
+    unit: string;
+    targets: {
+      daily: number;
+    };
+  };
   date: string;
   targetValue: number;
   actualValue: number;
@@ -82,6 +92,8 @@ export interface HealthTip {
 export interface DashboardData {
   activeGoals: number;
   todayProgress: DailyProgress[];
+  recentProgress: DailyProgress[];
+  goalsWithStreaks: WellnessGoal[];
   upcomingCare: PreventiveCare[];
   healthTip: HealthTip;
 }

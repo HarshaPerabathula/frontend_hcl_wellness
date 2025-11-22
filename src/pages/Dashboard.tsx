@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Card, Alert, Badge, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Alert, Badge, ListGroup, Table, ProgressBar } from 'react-bootstrap';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { useGetDashboardQuery } from '../store/api';
@@ -14,11 +14,11 @@ const Dashboard: React.FC = () => {
   });
 
   const progressChartData = {
-    labels: dashboardData?.todayProgress.map((_, index) => `Goal ${index + 1}`) || [],
+    labels: dashboardData?.todayProgress?.map(p => p.goalId?.goalType || 'Goal') || [],
     datasets: [{
       label: 'Progress %',
-      data: dashboardData?.todayProgress.map(p => p.completionPercentage) || [],
-      backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8'],
+      data: dashboardData?.todayProgress?.map(p => p.completionPercentage) || [],
+      backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1'],
     }]
   };
 
@@ -26,12 +26,23 @@ const Dashboard: React.FC = () => {
     labels: ['Completed', 'In Progress', 'Not Started'],
     datasets: [{
       data: [
-        dashboardData?.todayProgress.filter(p => p.achieved).length || 0,
-        dashboardData?.todayProgress.filter(p => !p.achieved && p.actualValue > 0).length || 0,
-        dashboardData?.todayProgress.filter(p => p.actualValue === 0).length || 0
+        dashboardData?.todayProgress?.filter(p => p.achieved).length || 0,
+        dashboardData?.todayProgress?.filter(p => !p.achieved && p.actualValue > 0).length || 0,
+        dashboardData?.todayProgress?.filter(p => p.actualValue === 0).length || 0
       ],
       backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
     }]
+  };
+
+  const getGoalTypeLabel = (type: string) => {
+    const labels: { [key: string]: string } = {
+      steps: 'Steps',
+      water_intake: 'Water Intake',
+      sleep_hours: 'Sleep Hours',
+      exercise_minutes: 'Exercise Minutes',
+      weight_loss: 'Weight Loss'
+    };
+    return labels[type] || type;
   };
 
   if (isLoading) return <Container className="mt-5"><Alert variant="info">Loading dashboard...</Alert></Container>;
@@ -56,7 +67,7 @@ const Dashboard: React.FC = () => {
               <Card className="text-center">
                 <Card.Body>
                   <h3 className="text-success">
-                    {dashboardData?.todayProgress.filter(p => p.achieved).length}
+                    {dashboardData?.todayProgress?.filter(p => p.achieved).length || 0}
                   </h3>
                   <p>Goals Achieved Today</p>
                 </Card.Body>
@@ -65,7 +76,7 @@ const Dashboard: React.FC = () => {
             <Col md={3}>
               <Card className="text-center">
                 <Card.Body>
-                  <h3 className="text-warning">{dashboardData?.upcomingCare.length}</h3>
+                  <h3 className="text-warning">{dashboardData?.upcomingCare?.length || 0}</h3>
                   <p>Upcoming Checkups</p>
                 </Card.Body>
               </Card>
@@ -87,10 +98,44 @@ const Dashboard: React.FC = () => {
               <Card>
                 <Card.Header>Today's Progress</Card.Header>
                 <Card.Body>
-                  {dashboardData?.todayProgress.length ? (
-                    <Bar data={progressChartData} options={{ responsive: true }} />
+                  {dashboardData?.todayProgress?.length ? (
+                    <>
+                      <Bar data={progressChartData} options={{ responsive: true }} />
+                      <Table striped className="mt-3">
+                        <thead>
+                          <tr>
+                            <th>Goal</th>
+                            <th>Target</th>
+                            <th>Actual</th>
+                            <th>Progress</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dashboardData.todayProgress.map((progress) => (
+                            <tr key={progress._id}>
+                              <td>{getGoalTypeLabel(progress.goalId?.goalType || '')}</td>
+                              <td>{progress.targetValue} {progress.goalId?.unit}</td>
+                              <td>{progress.actualValue} {progress.goalId?.unit}</td>
+                              <td>
+                                <ProgressBar 
+                                  now={progress.completionPercentage} 
+                                  label={${Math.round(progress.completionPercentage)}%}
+                                  variant={progress.achieved ? 'success' : 'warning'}
+                                />
+                              </td>
+                              <td>
+                                <Badge bg={progress.achieved ? 'success' : 'warning'}>
+                                  {progress.achieved ? 'Achieved' : 'In Progress'}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </>
                   ) : (
-                    <p>No progress data for today</p>
+                    <p>No progress logged for today. Visit the Goals page to log your progress!</p>
                   )}
                 </Card.Body>
               </Card>
@@ -105,12 +150,67 @@ const Dashboard: React.FC = () => {
             </Col>
           </Row>
 
+          <Row className="mb-4">
+            <Col md={12}>
+              <Card>
+                <Card.Header>My Active Goals & Streaks</Card.Header>
+                <Card.Body>
+                  {dashboardData?.goalsWithStreaks?.length ? (
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>Goal Type</th>
+                          <th>Daily Target</th>
+                          <th>Current Streak</th>
+                          <th>Longest Streak</th>
+                          <th>Overall Progress</th>
+                          <th>Today's Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dashboardData.goalsWithStreaks.map((goal) => (
+                          <tr key={goal._id}>
+                            <td>{getGoalTypeLabel(goal.goalType)}</td>
+                            <td>{goal.targets.daily} {goal.unit}</td>
+                            <td>
+                              <Badge bg="info">{goal.currentStreak} days</Badge>
+                            </td>
+                            <td>
+                              <Badge bg="success">{goal.longestStreak} days</Badge>
+                            </td>
+                            <td>
+                              <ProgressBar 
+                                now={goal.progress.completionRate} 
+                                label={${Math.round(goal.progress.completionRate)}%}
+                              />
+                            </td>
+                            <td>
+                              {goal.todayProgress ? (
+                                <Badge bg={goal.todayProgress.achieved ? 'success' : 'warning'}>
+                                  {goal.todayProgress.achieved ? 'Completed' : 'In Progress'}
+                                </Badge>
+                              ) : (
+                                <Badge bg="secondary">Not Started</Badge>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  ) : (
+                    <Alert variant="info">No active goals. Ask your healthcare provider to assign some goals!</Alert>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
           <Row>
             <Col md={6}>
               <Card>
                 <Card.Header>Upcoming Checkups</Card.Header>
                 <Card.Body>
-                  {dashboardData?.upcomingCare.length ? (
+                  {dashboardData?.upcomingCare?.length ? (
                     <ListGroup variant="flush">
                       {dashboardData.upcomingCare.map((care) => (
                         <ListGroup.Item key={care._id} className="d-flex justify-content-between">
