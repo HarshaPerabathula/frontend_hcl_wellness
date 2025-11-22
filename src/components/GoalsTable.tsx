@@ -17,7 +17,6 @@ const GoalsTable: React.FC<GoalsTableProps> = ({ goals, getGoalTypeLabel }) => {
           <th>Current Streak</th>
           <th>Longest Streak</th>
           <th>Overall Progress</th>
-          <th>Today's Status</th>
         </tr>
       </thead>
       <tbody>
@@ -36,15 +35,6 @@ const GoalsTable: React.FC<GoalsTableProps> = ({ goals, getGoalTypeLabel }) => {
                 now={goal.progress?.completionRate || 0} 
                 label={`${Math.round(goal.progress?.completionRate || 0)}%`}
               />
-            </td>
-            <td>
-              {goal.todayProgress ? (
-                <Badge bg={goal.todayProgress.achieved ? 'success' : 'warning'}>
-                  {goal.todayProgress.achieved ? 'Completed' : 'In Progress'}
-                </Badge>
-              ) : (
-                <Badge bg="secondary">Not Started</Badge>
-              )}
             </td>
           </tr>
         ))}

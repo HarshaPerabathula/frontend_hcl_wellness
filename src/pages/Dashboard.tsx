@@ -1,9 +1,14 @@
 import React from 'react';
-import { Container, Row, Col, Card, Alert, Badge, ListGroup, Table, ProgressBar } from 'react-bootstrap';
+import { Container, Row, Col, Card, Alert, Badge, ListGroup } from 'react-bootstrap';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { useGetDashboardQuery } from '../store/api';
 import { useAppSelector } from '../hooks/redux';
+import StatCard from '../components/StatCard';
+import ProgressTable from '../components/ProgressTable';
+import GoalsTable from '../components/GoalsTable';
+import EmptyState from '../components/EmptyState';
+import { getGoalTypeLabel } from '../utils/goalHelpers';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -34,21 +39,8 @@ const Dashboard: React.FC = () => {
     }]
   };
 
-  const getGoalTypeLabel = (type: string) => {
-    const labels: { [key: string]: string } = {
-      steps: 'Steps',
-      water_intake: 'Water Intake',
-      sleep_hours: 'Sleep Hours',
-      exercise_minutes: 'Exercise Minutes',
-      weight_loss: 'Weight Loss'
-    };
-    return labels[type] || type;
-  };
-
   if (isLoading) return <Container className="mt-5"><Alert variant="info">Loading dashboard...</Alert></Container>;
   if (error) return <Container className="mt-5"><Alert variant="danger">Failed to load dashboard</Alert></Container>;
-
-  console.log('Dashboard data:', dashboardData); // Debug log
 
   return (
     <Container className="mt-4">
@@ -58,42 +50,34 @@ const Dashboard: React.FC = () => {
         <>
           <Row className="mb-4">
             <Col md={3}>
-              <Card className="text-center">
-                <Card.Body>
-                  <h3 className="text-primary">{dashboardData?.activeGoals || 0}</h3>
-                  <p>Active Goals</p>
-                </Card.Body>
-              </Card>
+              <StatCard 
+                title="Active Goals" 
+                value={dashboardData?.activeGoals || 0} 
+                variant="primary" 
+              />
             </Col>
             <Col md={3}>
-              <Card className="text-center">
-                <Card.Body>
-                  <h3 className="text-success">
-                    {dashboardData?.todayProgress?.filter(p => p.achieved).length || 0}
-                  </h3>
-                  <p>Goals Achieved Today</p>
-                </Card.Body>
-              </Card>
+              <StatCard 
+                title="Goals Achieved Today" 
+                value={dashboardData?.todayProgress?.filter(p => p.achieved).length || 0} 
+                variant="success" 
+              />
             </Col>
             <Col md={3}>
-              <Card className="text-center">
-                <Card.Body>
-                  <h3 className="text-warning">{dashboardData?.upcomingCare?.length || 0}</h3>
-                  <p>Upcoming Checkups</p>
-                </Card.Body>
-              </Card>
+              <StatCard 
+                title="Upcoming Checkups" 
+                value={dashboardData?.upcomingCare?.length || 0} 
+                variant="warning" 
+              />
             </Col>
             <Col md={3}>
-              <Card className="text-center">
-                <Card.Body>
-                  <h3 className="text-info">
-                    {dashboardData?.todayProgress?.length ? 
-                      Math.round((dashboardData.todayProgress.reduce((acc, p) => acc + p.completionPercentage, 0)) / dashboardData.todayProgress.length) 
-                      : 0}%
-                  </h3>
-                  <p>Average Progress</p>
-                </Card.Body>
-              </Card>
+              <StatCard 
+                title="Average Progress" 
+                value={`${dashboardData?.todayProgress?.length ? 
+                  Math.round((dashboardData.todayProgress.reduce((acc, p) => acc + p.completionPercentage, 0)) / dashboardData.todayProgress.length) 
+                  : 0}%`} 
+                variant="info" 
+              />
             </Col>
           </Row>
 
@@ -105,46 +89,20 @@ const Dashboard: React.FC = () => {
                   {dashboardData?.todayProgress?.length ? (
                     <>
                       <Bar data={progressChartData} options={{ responsive: true }} />
-                      <Table striped className="mt-3">
-                        <thead>
-                          <tr>
-                            <th>Goal</th>
-                            <th>Target</th>
-                            <th>Actual</th>
-                            <th>Progress</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {dashboardData.todayProgress.map((progress) => (
-                            <tr key={progress._id}>
-                              <td>{getGoalTypeLabel(progress.goalId?.goalType || '')}</td>
-                              <td>{progress.targetValue} {progress.goalId?.unit}</td>
-                              <td>{progress.actualValue} {progress.goalId?.unit}</td>
-                              <td>
-                                <ProgressBar 
-                                  now={progress.completionPercentage} 
-                                  label={`${Math.round(progress.completionPercentage)}%`}
-                                  variant={progress.achieved ? 'success' : 'warning'}
-                                />
-                              </td>
-                              <td>
-                                <Badge bg={progress.achieved ? 'success' : 'warning'}>
-                                  {progress.achieved ? 'Achieved' : 'In Progress'}
-                                </Badge>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
+                      <ProgressTable 
+                        progress={dashboardData.todayProgress} 
+                        getGoalTypeLabel={getGoalTypeLabel} 
+                      />
                     </>
                   ) : (
                     <div>
-                      <p>No progress logged for today. Visit the Goals page to log your progress!</p>
+                      <EmptyState message="No progress logged for today. Visit the Goals page to log your progress!" />
                       {dashboardData?.activeGoals === 0 && (
-                        <Alert variant="warning">
-                          You don't have any active goals yet. Ask your healthcare provider to assign some wellness goals!
-                        </Alert>
+                        <EmptyState 
+                          message="You don't have any active goals yet. Ask your healthcare provider to assign some wellness goals!" 
+                          variant="warning" 
+                          showAlert 
+                        />
                       )}
                     </div>
                   )}
@@ -159,7 +117,7 @@ const Dashboard: React.FC = () => {
                     <Doughnut data={goalStatusData} options={{ responsive: true }} />
                   ) : (
                     <div className="text-center">
-                      <p>No progress data available</p>
+                      <EmptyState message="No progress data available" />
                       <Badge bg="secondary">Start logging your daily progress!</Badge>
                     </div>
                   )}
@@ -174,54 +132,19 @@ const Dashboard: React.FC = () => {
                 <Card.Header>My Active Goals & Streaks</Card.Header>
                 <Card.Body>
                   {dashboardData?.goalsWithStreaks?.length ? (
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>Goal Type</th>
-                          <th>Daily Target</th>
-                          <th>Current Streak</th>
-                          <th>Longest Streak</th>
-                          <th>Overall Progress</th>
-                          <th>Today's Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dashboardData.goalsWithStreaks.map((goal) => (
-                          <tr key={goal._id}>
-                            <td>{getGoalTypeLabel(goal.goalType)}</td>
-                            <td>{goal.targets.daily} {goal.unit}</td>
-                            <td>
-                              <Badge bg="info">{goal.currentStreak || 0} days</Badge>
-                            </td>
-                            <td>
-                              <Badge bg="success">{goal.longestStreak || 0} days</Badge>
-                            </td>
-                            <td>
-                              <ProgressBar 
-                                now={goal.progress?.completionRate || 0} 
-                                label={`${Math.round(goal.progress?.completionRate || 0)}%`}
-                              />
-                            </td>
-                            <td>
-                              {goal.todayProgress ? (
-                                <Badge bg={goal.todayProgress.achieved ? 'success' : 'warning'}>
-                                  {goal.todayProgress.achieved ? 'Completed' : 'In Progress'}
-                                </Badge>
-                              ) : (
-                                <Badge bg="secondary">Not Started</Badge>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
+                    <GoalsTable 
+                      goals={dashboardData.goalsWithStreaks} 
+                      getGoalTypeLabel={getGoalTypeLabel} 
+                    />
                   ) : (
-                    <Alert variant="info">
-                      {dashboardData?.activeGoals === 0 ? 
+                    <EmptyState 
+                      message={dashboardData?.activeGoals === 0 ? 
                         "No active goals. Ask your healthcare provider to assign some goals!" :
                         "You have active goals but no progress logged yet. Visit the Goals page to start tracking!"
-                      }
-                    </Alert>
+                      } 
+                      variant="info" 
+                      showAlert 
+                    />
                   )}
                 </Card.Body>
               </Card>
@@ -249,7 +172,7 @@ const Dashboard: React.FC = () => {
                       ))}
                     </ListGroup>
                   ) : (
-                    <p>No upcoming checkups scheduled</p>
+                    <EmptyState message="No upcoming checkups scheduled" />
                   )}
                 </Card.Body>
               </Card>
@@ -265,7 +188,7 @@ const Dashboard: React.FC = () => {
                       <Badge bg="info">{dashboardData.healthTip.category}</Badge>
                     </>
                   ) : (
-                    <p>No health tip available</p>
+                    <EmptyState message="No health tip available" />
                   )}
                 </Card.Body>
               </Card>

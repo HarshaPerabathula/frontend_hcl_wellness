@@ -15,7 +15,7 @@ const AppNavbar: React.FC = () => {
   };
 
   return (
-    <Navbar bg="primary" variant="dark" expand="lg">
+    <Navbar style={{ backgroundColor: '#1e3a8a' }} variant="dark" expand="lg">
       <Container>
         <Navbar.Brand as={Link} to="/">HealthCare System</Navbar.Brand>
         <Navbar.Toggle />
@@ -44,7 +44,7 @@ const AppNavbar: React.FC = () => {
             {isAuthenticated ? (
               <>
                 <Navbar.Text className="me-3">
-                  Welcome, {user?.profile?.firstName || ""}
+                  Welcome, {user?.profile.firstName}
                 </Navbar.Text>
                 <Button variant="outline-light" onClick={handleLogout}>
                   Logout
