@@ -48,6 +48,8 @@ const Dashboard: React.FC = () => {
   if (isLoading) return <Container className="mt-5"><Alert variant="info">Loading dashboard...</Alert></Container>;
   if (error) return <Container className="mt-5"><Alert variant="danger">Failed to load dashboard</Alert></Container>;
 
+  console.log('Dashboard data:', dashboardData); // Debug log
+
   return (
     <Container className="mt-4">
       <h2>Dashboard</h2>
@@ -58,7 +60,7 @@ const Dashboard: React.FC = () => {
             <Col md={3}>
               <Card className="text-center">
                 <Card.Body>
-                  <h3 className="text-primary">{dashboardData?.activeGoals}</h3>
+                  <h3 className="text-primary">{dashboardData?.activeGoals || 0}</h3>
                   <p>Active Goals</p>
                 </Card.Body>
               </Card>
@@ -85,7 +87,9 @@ const Dashboard: React.FC = () => {
               <Card className="text-center">
                 <Card.Body>
                   <h3 className="text-info">
-                    {Math.round((dashboardData?.todayProgress?.reduce((acc, p) => acc + p.completionPercentage, 0) || 0) / (dashboardData?.todayProgress?.length || 1))}%
+                    {dashboardData?.todayProgress?.length ? 
+                      Math.round((dashboardData.todayProgress.reduce((acc, p) => acc + p.completionPercentage, 0)) / dashboardData.todayProgress.length) 
+                      : 0}%
                   </h3>
                   <p>Average Progress</p>
                 </Card.Body>
@@ -120,7 +124,7 @@ const Dashboard: React.FC = () => {
                               <td>
                                 <ProgressBar 
                                   now={progress.completionPercentage} 
-                                  label={${Math.round(progress.completionPercentage)}%}
+                                  label={`${Math.round(progress.completionPercentage)}%`}
                                   variant={progress.achieved ? 'success' : 'warning'}
                                 />
                               </td>
@@ -135,7 +139,14 @@ const Dashboard: React.FC = () => {
                       </Table>
                     </>
                   ) : (
-                    <p>No progress logged for today. Visit the Goals page to log your progress!</p>
+                    <div>
+                      <p>No progress logged for today. Visit the Goals page to log your progress!</p>
+                      {dashboardData?.activeGoals === 0 && (
+                        <Alert variant="warning">
+                          You don't have any active goals yet. Ask your healthcare provider to assign some wellness goals!
+                        </Alert>
+                      )}
+                    </div>
                   )}
                 </Card.Body>
               </Card>
@@ -144,7 +155,14 @@ const Dashboard: React.FC = () => {
               <Card>
                 <Card.Header>Goal Status</Card.Header>
                 <Card.Body>
-                  <Doughnut data={goalStatusData} options={{ responsive: true }} />
+                  {dashboardData?.todayProgress?.length ? (
+                    <Doughnut data={goalStatusData} options={{ responsive: true }} />
+                  ) : (
+                    <div className="text-center">
+                      <p>No progress data available</p>
+                      <Badge bg="secondary">Start logging your daily progress!</Badge>
+                    </div>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
@@ -173,15 +191,15 @@ const Dashboard: React.FC = () => {
                             <td>{getGoalTypeLabel(goal.goalType)}</td>
                             <td>{goal.targets.daily} {goal.unit}</td>
                             <td>
-                              <Badge bg="info">{goal.currentStreak} days</Badge>
+                              <Badge bg="info">{goal.currentStreak || 0} days</Badge>
                             </td>
                             <td>
-                              <Badge bg="success">{goal.longestStreak} days</Badge>
+                              <Badge bg="success">{goal.longestStreak || 0} days</Badge>
                             </td>
                             <td>
                               <ProgressBar 
-                                now={goal.progress.completionRate} 
-                                label={${Math.round(goal.progress.completionRate)}%}
+                                now={goal.progress?.completionRate || 0} 
+                                label={`${Math.round(goal.progress?.completionRate || 0)}%`}
                               />
                             </td>
                             <td>
@@ -198,7 +216,12 @@ const Dashboard: React.FC = () => {
                       </tbody>
                     </Table>
                   ) : (
-                    <Alert variant="info">No active goals. Ask your healthcare provider to assign some goals!</Alert>
+                    <Alert variant="info">
+                      {dashboardData?.activeGoals === 0 ? 
+                        "No active goals. Ask your healthcare provider to assign some goals!" :
+                        "You have active goals but no progress logged yet. Visit the Goals page to start tracking!"
+                      }
+                    </Alert>
                   )}
                 </Card.Body>
               </Card>
@@ -226,7 +249,7 @@ const Dashboard: React.FC = () => {
                       ))}
                     </ListGroup>
                   ) : (
-                    <p>No upcoming checkups</p>
+                    <p>No upcoming checkups scheduled</p>
                   )}
                 </Card.Body>
               </Card>
